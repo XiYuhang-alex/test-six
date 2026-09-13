@@ -1,5 +1,6 @@
 const state = { data: null };
 let barChart = null;
+let lineChart = null;
 
 const loadData = async () => {
   $('#status').text('加载中...').show();
@@ -19,6 +20,7 @@ const loadData = async () => {
     
     renderCards(data);
     renderBarChart(data);
+    renderLineChart(data);
     
   } catch (error) {
     $('#status').text('加载失败: ' + error.message).show();
@@ -60,5 +62,38 @@ const renderBarChart = (data) => {
     }))
   });
 };
+
+const renderLineChart = (data) => {
+  if (lineChart !== null) {
+    lineChart.destroy();
+  }
+  const ctx = document.querySelector('#line-chart');
+  lineChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: data.days,
+      datasets: data.series.map(s => ({
+        label: s.category,
+        data: s.amounts,
+        borderWidth: 1
+      }))
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        title: { display: true, text: '消费趋势（单位：元）' }
+      }
+    }
+  });
+};
+
+window.addEventListener('resize', () => {
+  if (barChart) barChart.resize();
+});
+
+$('#cards').on('click', '.card', function () {
+  $(this).toggleClass('border-primary shadow');
+});
 
 loadData();
